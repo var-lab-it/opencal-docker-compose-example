@@ -1,0 +1,83 @@
+services:
+  database:
+    env_file:
+      - .env
+    image: mysql:8.2
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    command:
+      - '--default-authentication-plugin=caching_sha2_password'
+      - '--sql_mode='
+      - '--max_allowed_packet=1073741824'
+    volumes:
+      - database:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "-u", "root", "-psymfony", "ping", "-h", "localhost"]
+      timeout: 30s
+      retries: 30
+    ports:
+      - '${MYSQL_PORT}:3306'
+
+  php_backend:
+    env_file:
+      - .env
+    image: ghcr.io/var-lab-it/opencal:${OPENCAL_VERSION}
+    platform: "linux/amd64"
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      TIMEZONE: Europe/Berlin
+      PS1: '[${BACKEND_SERVER_NAME}]::$$(pwd) # '
+      FRONTEND_HOST: ${FRONTEND_HOST}
+      USE_SSL: ${USE_SSL}
+      APP_ENV: prod
+    volumes:
+      - php_socket:/var/run/php
+
+  php_backend_consumer:
+    env_file:
+      - .env
+    image: ghcr.io/var-lab-it/opencal:${OPENCAL_VERSION}
+    platform: "linux/amd64"
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      TIMEZONE: Europe/Berlin
+      PS1: '[${BACKEND_SERVER_NAME}]::$$(pwd) # '
+      FRONTEND_HOST: ${FRONTEND_HOST}
+      USE_SSL: ${USE_SSL}
+      APP_ENV: prod
+    volumes:
+      - php_socket:/var/run/php
+    command: 'php bin/console messenger:consume async -v'
+    restart: always
+
+  nginx_backend:
+    image: ghcr.io/var-lab-it/opencal:nginx-${OPENCAL_VERSION}
+    platform: "linux/amd64"
+    depends_on:
+      - php_backend
+    volumes:
+      - php_socket:/var/run/php
+    ports:
+      - '${BACKEND_PORT}:80'
+
+  frontend:
+    image: ghcr.io/var-lab-it/opencal-web:${OPENCAL_VERSION}
+    platform: "linux/amd64"
+    environment:
+      NODE_ENV: production
+    depends_on:
+      - nginx_backend
+    ports:
+      - "${FRONTEND_PORT}:5173"
+
+volumes:
+  php_socket:
+  database:
+    driver: local
