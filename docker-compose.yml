@@ -75,7 +75,7 @@ services:
     depends_on:
       - nginx_backend
     ports:
-      - "${FRONTEND_PORT}:5173"
+      - "${FRONTEND_PORT}:8080"
 
 volumes:
   php_socket:

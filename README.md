@@ -1,85 +1,39 @@
-# OpenCal - local development environment
+# Run OpenCal in docker-compose
 
-This repository is created for local development of OpenCal, especially for the following repositories:
+This is an example how to get running OpenCal (frontend & backend) with docker-compose.
 
-- [OpenCal Web Frontend](https://github.com/var-lab-it/opencal-web)
-- [OpenCal Backend API](https://github.com/var-lab-it/opencal)
+It is simple to use:
 
-## Getting started
-
-1. Create a directory for all repositories:
-
-```
-mkdir ~/your-projects/opencal
-cd ~/your-projects/opencal
-```
-
-2. Pull this repository
+1. Pull this repo
 
 ```bash
-git clone git@github.com:var-lab-it/opencal-dev.git
+git clone git@github.com:var-lab-it/opencal-docker-compose-example.git
 ```
 
-It should be placed in the folder `~/your-projects/opencal`.
-
-3. Pull the frontend repository:
-
-```bash
-git@github.com:var-lab-it/opencal-web.git
-```
-
-It should be placed in the folder `~/your-projects/opencal`.
-
-4. Pull the backend repository:
-
-```bash
-git@github.com:var-lab-it/opencal.git
-```
-
-It should be placed in the folder `~/your-projects/opencal`.
-
-Directory structure after pulling all required repositories:
-
-```
-~/your-projects/opencal
-|-- /opencal-dev
-|-- /opencal-web
-|-- /opencal
-```
-
-5. Create `.env`-file
-
-You can copy the `.env.dist` file, it contains a basic configuration:
+2. Create .env-file
 
 ```bash
 cp .env.dist .env
 ```
 
-6. Build the docker images
+(and adjust it if required).
+
+3. Run it
 
 ```bash
-make build
-# or
-docker compose build
-```
-
-7. Install the dependencies outside the containers
-
-```bash
-make install
-# or
-docker compose run --entrypoint="composer" php_backend install
-docker compose run --entrypoint="npm" frontend install
-```
-
-8. Start the docker containers
-
-```bash
-make up
-# or 
 docker compose up -d
 ```
 
-OpenCal is licensed under the GNU AGPLv3 License.
+## Update
 
-Created by var-lab IT GmbH and contributors.
+Just run
+
+```bash
+docker compose pull
+```
+
+and then
+
+```bash
+docker compose up -d
+```
